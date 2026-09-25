@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: enterprise-service-agent}
+spec:
+ replicas: 3
+ selector: {matchLabels: {app: service-agent}}
+ template:
+  metadata: {labels: {app: service-agent}}
+  spec:
+   automountServiceAccountToken: false
+   containers:
+   - name: api
+     image: enterprise-service-agent:1.0
+     ports: [{containerPort: 8000}]
+     securityContext: {runAsNonRoot: true, allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: ["ALL"]}}
+     resources: {requests: {cpu: "250m", memory: "256Mi"}, limits: {cpu: "2", memory: "1Gi"}}
+     readinessProbe: {httpGet: {path: /health, port: 8000}}
